@@ -3,7 +3,7 @@ import Category from './category';
 export interface TransactionModelData {
     id: number;
     date?: Date;
-    payee?: string;
+    description?: string;
     category?: Category;
     memo?: string;
     value: number;
@@ -12,7 +12,7 @@ export interface TransactionModelData {
 export default class TransactionModel implements TransactionModel {
     id: number;
     date?: Date;
-    payee?: string;
+    description?: string;
     category?: Category;
     memo?: string;
     value: number = 0;

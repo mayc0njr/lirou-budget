@@ -1,14 +1,15 @@
-import Avatar from 'components/Avatar';
-import logo from 'assets/logo.svg';
+// import Avatar from 'components/Avatar';
+// import logo from 'assets/logo.svg';
 import TransactionModel from 'models/transaction';
 import Category from 'models/category';
-import Transactions from 'pages/transactions';
+// import TransactionList from 'components/transaction-list';
+import Account from 'pages/account';
 
-const randoms = [
-    [1, 2],
-    [3, 4, 5],
-    [6, 7]
-];
+// const randoms = [
+//     [1, 2],
+//     [3, 4, 5],
+//     [6, 7]
+// ];
 
 function App() {
     const transactions: TransactionModel[] = [];
@@ -17,22 +18,23 @@ function App() {
     const transaction3 = new TransactionModel(3);
     transaction.category = new Category('categoria', 1);
     transaction.date = new Date();
-    transaction.payee = 'Today';
+    transaction.description = 'Today';
     transaction.value = 1;
     transaction2.category = new Category('caregotia', 2);
     transaction2.date = new Date();
-    transaction2.payee = 'Today';
+    transaction2.description = 'Today';
     transaction2.value = -1;
     transaction3.category = new Category('categoria', 3);
     transaction3.date = new Date();
-    transaction3.payee = 'Today';
+    transaction3.description = 'Today';
     transaction3.value = 3;
     transactions.push(transaction);
     transactions.push(transaction2);
     transactions.push(transaction3);
     return (
-        <div className="relative overflow-hidden bg-white">
-            <div className="h-screen sm:pb-40 sm:pt-24 lg:pb-48 lg:pt-40">
+        // <div className="lg:flex lg:flex-col">
+        //     <div className="relative w-full overflow-hidden bg-white">
+        /* <div className="h-screen sm:pb-40 sm:pt-24 lg:pb-48 lg:pt-40">
                 <div className="relative mx-auto max-w-7xl px-4 sm:static sm:px-6 lg:px-8">
                     <div className="sm:max-w-lg">
                         <div className="my-4">
@@ -84,9 +86,10 @@ function App() {
                         </div>
                     </div>
                 </div>
-            </div>
-            <Transactions key="transactions" transactions={transactions} />
-        </div>
+            </div> */
+        <Account key="account" transactions={transactions} />
+        /* </div>
+        </div> */
     );
 }
 
