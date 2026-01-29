@@ -4,14 +4,46 @@ import { useTransactionsStore } from '@/stores/transactions'
 
 const store = useTransactionsStore()
 
-// filtro (estado local)
-const selectedYear = ref<number | ''>('')
-const selectedMonthNumber = ref<number | ''>('')
+// gera lista de meses existentes com base nas transações
+const allMonths = computed(() => {
+  const months = new Set<string>()
 
-const selectedMonth = computed(() => {
-  if (!selectedYear.value || !selectedMonthNumber.value) return ''
-  return `${selectedYear.value}-${String(selectedMonthNumber.value).padStart(2, '0')}`
+  store.transactions.forEach(t => {
+    months.add(t.date.slice(0, 7)) // YYYY-MM
+  })
+
+  return Array.from(months).sort()
 })
+
+const WINDOW_SIZE = 4 //numero de itens visíveis
+const windowStart = ref(0)
+
+const visibleMonths = computed(() =>
+  allMonths.value.slice(
+    windowStart.value,
+    windowStart.value + WINDOW_SIZE
+  )
+)
+
+function canGoPrev() {
+  return windowStart.value > 0
+}
+
+function canGoNext() {
+  return windowStart.value + WINDOW_SIZE < allMonths.value.length
+}
+
+function goPrev() {
+  if (canGoPrev()) {
+    windowStart.value--
+  }
+}
+
+function goNext() {
+  if (canGoNext()) {
+    windowStart.value++
+  }
+}
 
 // dados agregados
 const incomeTotal = computed(() =>
