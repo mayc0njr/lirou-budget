@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createPinia, setActivePinia } from 'pinia'
+import { createPinia } from 'pinia'
 import Dashboard from '@/views/Dashboard.vue'
 import TransactionForm from '@/components/TransactionForm.vue'
 import type { Transaction } from '@/types/Transaction'
@@ -14,11 +14,7 @@ vi.mock('@/utils/csv', () => ({
 
 import { downloadCSV } from '@/utils/csv'
 
-
 describe('Dashboard.vue', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-  })
 
   it('renderiza o dashboard corretamente', () => {
     const wrapper = mount(Dashboard, {
