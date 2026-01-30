@@ -20,14 +20,6 @@
           </router-link>
 
           <router-link
-            to="/add"
-            class="text-gray-600 hover:text-blue-600"
-            active-class="text-blue-600 font-medium"
-          >
-            Nova Transação
-          </router-link>
-
-          <router-link
             to="/monthly-summary"
             class="text-gray-600 hover:text-blue-600"
             active-class="text-blue-600 font-medium"
