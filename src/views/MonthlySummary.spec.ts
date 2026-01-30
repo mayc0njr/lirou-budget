@@ -108,6 +108,73 @@ describe('MonthlySummary.vue', () => {
     expect(blockTitles.some(t => t.includes('2026-01'))).toBe(false)
   })
 
+  it('avança a janela ao arrastar o mouse para a esquerda', async () => {
+    const pinia = createPinia()
+    seedStore(pinia)
+
+    const wrapper = mount(MonthlySummary, {
+      global: {
+        plugins: [pinia]
+      }
+    })
+
+    const container = wrapper.find('[data-testid="months-container"]')
+    const el = container.element;
+    await el.dispatchEvent( //Dispatch event = trigga o evento no DOM. Já o trigger() só dispara eventos do sistema do Vue, não eventos DOM nativos registrados com addEventListener.
+      new MouseEvent('mousedown', {
+        clientX: 200
+      })
+    )
+    await window.dispatchEvent(
+      new MouseEvent('mousemove', {
+        clientX: 100
+      })
+    )
+    await window.dispatchEvent(new MouseEvent('mouseup'))
+
+    await wrapper.vm.$nextTick()
+
+    const blockTitles = wrapper
+      .findAll('[data-testid="monthly-block"]')
+      .map(b => b.text())
+
+    expect(blockTitles.some(t => t.includes('2026-02'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-03'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-04'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-01'))).toBe(false)
+  })
+
+  it('avança a janela ao swipe para a esquerda', async () => {
+    const pinia = createPinia()
+    seedStore(pinia)
+
+    const wrapper = mount(MonthlySummary, {
+      global: {
+        plugins: [pinia]
+      }
+    })
+
+    const container = wrapper.find('[data-testid="months-container"]')
+    await container.trigger('touchstart', {
+      touches: [{ clientX: 200 }]
+    })
+    await container.trigger('touchmove', {
+      touches: [{ clientX: 100 }]
+    })
+    await container.trigger('touchend')
+
+    await wrapper.vm.$nextTick()
+
+    const blockTitles = wrapper
+      .findAll('[data-testid="monthly-block"]')
+      .map(b => b.text())
+
+    expect(blockTitles.some(t => t.includes('2026-02'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-03'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-04'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-01'))).toBe(false)
+  })
+
   it('volta a janela ao clicar em anterior', async () => {
     const pinia = createPinia()
     seedStore(pinia)
@@ -135,6 +202,99 @@ describe('MonthlySummary.vue', () => {
     expect(blockTitles.some(t => t.includes('2026-01'))).toBe(true)
     expect(blockTitles.some(t => t.includes('2026-02'))).toBe(true)
     expect(blockTitles.some(t => t.includes('2026-03'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-04'))).toBe(false)
+  })
+
+  it('volta a janela ao arrastar o mouse pra direita', async () => {
+    const pinia = createPinia()
+    seedStore(pinia)
+
+    const wrapper = mount(MonthlySummary, {
+      global: {
+        plugins: [pinia]
+      }
+    })
+
+    // avança
+
+    const container = wrapper.find('[data-testid="months-container"]')
+    const el = container.element
+    await el.dispatchEvent( //Dispatch event = trigga o evento no DOM. Já o trigger() só dispara eventos do sistema do Vue, não eventos DOM nativos registrados com addEventListener.
+      new MouseEvent('mousedown', {
+        clientX: 200
+      })
+    )
+    await window.dispatchEvent(
+      new MouseEvent('mousemove', {
+        clientX: 100
+      })
+    )
+    await window.dispatchEvent(new MouseEvent('mouseup'))
+
+    // volta
+
+    await el.dispatchEvent( 
+      new MouseEvent('mousedown', {
+        clientX: 200
+      })
+    )
+    await window.dispatchEvent(
+      new MouseEvent('mousemove', {
+        clientX: 300
+      })
+    )
+    await window.dispatchEvent(new MouseEvent('mouseup'))
+
+
+    const blockTitles = wrapper
+      .findAll('[data-testid="monthly-block"]')
+      .map(b => b.text())
+
+    expect(blockTitles.some(t => t.includes('2026-01'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-02'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-03'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-04'))).toBe(false)
+  })
+
+  it('volta a janela ao swipe pra direita', async () => {
+    const pinia = createPinia()
+    seedStore(pinia)
+
+    const wrapper = mount(MonthlySummary, {
+      global: {
+        plugins: [pinia]
+      }
+    })
+
+    // avança
+
+    const container = wrapper.find('[data-testid="months-container"]')
+    await container.trigger('touchstart', {
+      touches: [{ clientX: 200 }]
+    })
+    await container.trigger('touchmove', {
+      touches: [{ clientX: 100 }]
+    })
+    await container.trigger('touchend')
+
+    // volta
+
+    await container.trigger('touchstart', {
+      touches: [{ clientX: 200 }]
+    })
+    await container.trigger('touchmove', {
+      touches: [{ clientX: 300 }]
+    })
+    await container.trigger('touchend')
+
+    const blockTitles = wrapper
+      .findAll('[data-testid="monthly-block"]')
+      .map(b => b.text())
+
+    expect(blockTitles.some(t => t.includes('2026-01'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-02'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-03'))).toBe(true)
+    expect(blockTitles.some(t => t.includes('2026-04'))).toBe(false)
   })
 
   it('desabilita navegação quando não há mais meses', async () => {
