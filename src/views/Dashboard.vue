@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useTransactionsStore } from '@/stores/transactions'
 import TransactionForm from '@/components/TransactionForm.vue'
 import type { Transaction } from '@/types/Transaction'
+import { transactionsToCSV, downloadCSV } from '@/utils/csv'
 
 const store = useTransactionsStore()
 
@@ -48,15 +49,39 @@ const categoryTotals = computed(() =>
     : {}
 )
 
+const exportableTransactions = computed(() =>
+  selectedMonth.value
+    ? store.getTransactionsByMonth(selectedMonth.value)
+    : store.transactions
+)
+
 function handleSubmit(transaction: Transaction) {
   store.addTransaction(transaction)
+}
+
+function exportCSV() {
+
+  const suffix = selectedMonth.value
+    ? `-${selectedMonth.value}`
+    : ''
+
+  downloadCSV(exportableTransactions.value, `transacoes${suffix}.csv`)
 }
 
 </script>
 
 <template>
 
-  <TransactionForm @submit="handleSubmit" />
+  <section>
+    <div class="place-items-center grid">
+      <TransactionForm
+        data-testid="transaction-form"
+        @submit="handleSubmit"
+      />
+    </div>
+  </section>
+
+  <hr class="my-8" />
 
   <h2 class="text-2xl font-semibold mb-6">
     Dashboard
@@ -64,21 +89,21 @@ function handleSubmit(transaction: Transaction) {
 
   <!-- 🔹 RESUMO GLOBAL -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-    <div class="bg-white p-4 rounded shadow">
+    <div class="bg-green-50 p-4 rounded shadow" data-testid="summary-income">
       <p class="text-sm text-gray-500">Entradas (Total)</p>
       <p class="text-xl font-semibold text-green-600">
         {{ store.totalIncome }}
       </p>
     </div>
 
-    <div class="bg-white p-4 rounded shadow">
+    <div class="bg-red-50 p-4 rounded shadow" data-testid="summary-expense">
       <p class="text-sm text-gray-500">Saídas (Total)</p>
       <p class="text-xl font-semibold text-red-600">
         {{ store.totalExpense }}
       </p>
     </div>
 
-    <div class="bg-white p-4 rounded shadow">
+    <div class="bg-grey-50 p-4 rounded shadow"a data-testid="summary-balance">
       <p class="text-sm text-gray-500">Saldo (Total)</p>
       <p
         class="text-xl font-semibold"
@@ -89,66 +114,74 @@ function handleSubmit(transaction: Transaction) {
     </div>
   </div>
 
-<!-- 🔹 FILTRO DE MÊS (ANO + MÊS) -->
-<div class="flex gap-4 mb-6">
-  <!-- Ano -->
-  <div>
-    <label class="block text-sm font-medium mb-1">
-      Ano
-    </label>
-    <input
-      type="number"
-      min="2000"
-      max="2100"
-      v-model="selectedYear"
-      class="rounded border px-3 py-2 w-28"
-      placeholder="2026"
-      id="inputYear"
-    />
-  </div>
+  <!-- 🔹 FILTRO DE MÊS (ANO + MÊS) -->
+  <div class="flex gap-4 mb-6">
+    <!-- Ano -->
+    <div>
+      <label class="block text-sm font-medium mb-1">
+        Ano
+      </label>
+      <input
+        type="number"
+        min="2000"
+        max="2100"
+        v-model="selectedYear"
+        class="rounded border px-3 py-2 w-28"
+        id="inputYear"
+        data-testid="filter-year"
+      />
+    </div>
 
-  <!-- Mês -->
-  <div>
-    <label class="block text-sm font-medium mb-1">
-      Mês
-    </label>
-    <select
-      v-model="selectedMonthNumber"
-      class="rounded border px-3 py-2 w-36"
-      id="inputMonth"
-    >
-      <option value="">Selecione</option>
-      <option
-        v-for="m in 12"
-        :key="m"
-        :value="m"
+    <!-- Mês -->
+    <div>
+      <label class="block text-sm font-medium mb-1">
+        Mês
+      </label>
+      <select
+        v-model="selectedMonthNumber"
+        class="rounded border px-3 py-2 w-36"
+        id="inputMonth"
+        data-testid="filter-month"
       >
-        {{ m.toString().padStart(2, '0') }}
-      </option>
-    </select>
+        <option value="">Selecione</option>
+        <option
+          v-for="m in 12"
+          :key="m"
+          :value="m"
+        >
+          {{ m.toString().padStart(2, '0') }}
+        </option>
+      </select>
+    </div>
+    <button
+      data-testid="export-csv"
+      class="px-4 py-2 border rounded bg-gray-600 hover:bg-gray-700 text-white"
+      @click="exportCSV"
+    >
+      Exportar CSV
+    </button>
   </div>
-</div>
 
   <!-- 🔹 RESUMO MENSAL -->
   <div
     v-if="selectedMonth"
     class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
   >
-    <div class="bg-white p-4 rounded shadow">
+    <div class="bg-green-50 p-4 rounded shadow" data-testid="monthly-income">
       <p class="text-sm text-gray-500">Entradas do mês</p>
       <p class="text-xl font-semibold text-green-600">
         {{ monthlyIncome }}
       </p>
     </div>
 
-    <div class="bg-white p-4 rounded shadow">
+    <div class="bg-red-50 p-4 rounded shadow" data-testid="monthly-expense">
       <p class="text-sm text-gray-500">Saídas do mês</p>
       <p class="text-xl font-semibold text-red-600">
         {{ monthlyExpense }}
       </p>
     </div>
 
-    <div class="bg-white p-4 rounded shadow">
+    <div class="bg-gray-50 p-4 rounded shadow" data-testid="monthly-balance">
       <p class="text-sm text-gray-500">Saldo do mês</p>
       <p
         class="text-xl font-semibold"
@@ -180,6 +213,7 @@ function handleSubmit(transaction: Transaction) {
           v-for="t in monthlyTransactions"
           :key="t.id"
           class="border-t"
+          data-testid="transaction-row"
         >
           <td class="px-4 py-2">
             {{ t.date }}

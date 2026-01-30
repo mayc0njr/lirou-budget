@@ -52,7 +52,7 @@ function submit() {
     class="max-w-md space-y-4 bg-white p-4 rounded shadow"
     @submit.prevent="submit"
   >
-    <h3 class="text-lg font-semibold">
+    <h3 class="text-lg font-semibold sm:px-32">
       Nova Transação
     </h3>
 
@@ -106,7 +106,7 @@ function submit() {
 
     <button
       type="submit"
-      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
     >
       Salvar
     </button>

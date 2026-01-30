@@ -1,10 +1,19 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import Dashboard from '@/views/Dashboard.vue'
 import TransactionForm from '@/components/TransactionForm.vue'
 import type { Transaction } from '@/types/Transaction'
 import { useTransactionsStore } from '@/stores/transactions'
+
+// 👇 mock do util
+vi.mock('@/utils/csv', () => ({
+  transactionsToCSV: vi.fn(() => 'csv-content'),
+  downloadCSV: vi.fn()
+}))
+
+import { downloadCSV } from '@/utils/csv'
+
 
 describe('Dashboard.vue', () => {
   beforeEach(() => {
@@ -71,8 +80,8 @@ describe('Dashboard.vue', () => {
 
 
     // Filtrar o mês correto:
-    const yearInput = wrapper.find('input#inputYear')
-    const monthSelect = wrapper.find('select#inputMonth')
+    const yearInput = wrapper.find('[data-testid="filter-year"]')
+    const monthSelect = wrapper.find('[data-testid="filter-month"]')
 
     await yearInput.setValue(2026)
     await monthSelect.setValue('3')
@@ -80,7 +89,7 @@ describe('Dashboard.vue', () => {
     await wrapper.vm.$nextTick()
 
 
-    const rows = wrapper.findAll('tbody tr')
+    const rows = wrapper.findAll('[data-testid="transaction-row"]')
 
     // deve existir pelo menos uma linha de transação
     expect(rows.length).toBeGreaterThan(0)
@@ -129,4 +138,16 @@ describe('Dashboard.vue', () => {
     expect(wrapper.text()).toContain('Mercado') //Testar texto não é o recomendado, mas aqui estou testando de diferentes formas.
     expect(wrapper.text()).not.toContain('Aluguel')
   })
+
+  it('chama exportação ao clicar no botão', async () => {
+    const pinia = createPinia()
+    const wrapper = mount(Dashboard, {
+      global: { plugins: [pinia] }
+    })
+
+    await wrapper.find('[data-testid="export-csv"]').trigger('click')
+
+    expect(downloadCSV).toHaveBeenCalled()
+  })
+
 })
